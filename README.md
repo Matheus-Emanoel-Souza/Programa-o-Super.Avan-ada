@@ -69,8 +69,6 @@ while(estado != 100){
         }
         escolha = 0;
         break;
-
-   
     default:
         break;
     }
