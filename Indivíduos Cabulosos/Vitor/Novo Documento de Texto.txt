@@ -1,0 +1,151 @@
+// codigo da ultima aula dia 24/04
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+   
+   //INFOR\\
+// strcat -- recebe dois ponteiros char 1º quarda informação, 2º 
+
+typedef enum tipo
+{
+    MULT,
+    TEXT
+}TIPOTELA;
+
+typedef struct tela
+{
+    char titulo[40];
+    char info[40];
+    int opcao;
+    TIPOTELA tipo_tela;
+}TELA;
+
+TELA telas_programas[3] =
+{
+    {"          ---MENU---", "1- p SEGUIR e 2- para sair", 0, MULT},
+    {"          ---TELA 2---", "1- p SEGUIR, 2- voltar e 3 sair", 0, MULT},
+    {"          ---TELA 3---", "1- p NEMU, 2- p VOLTAR e 3 sair", 0, MULT},
+};
+
+void imprimirTela(int ntela)
+{
+    system("cls");
+    printf("%s\n", telas_programas[ntela].titulo);
+    printf("%s\n", telas_programas[ntela].info);
+
+}
+int imprimirCasos(int escolha, int i){
+    if(escolha == 1)
+        {
+            estado = 0;
+        }
+        else if(escolha == 2)
+        {
+            estado = 1;
+        }
+        else if(escolha == 3)
+        {
+            estado = 100;
+        }
+        escolha = 0;
+}
+
+int main()
+{
+    int estado = 0;
+    int escolha = 0;
+
+while(estado != 100){
+    switch (estado)
+    {
+    case 0:
+        imprimirTela(0);
+        scanf("%i", &escolha);
+        if(escolha == 1)
+        {
+            estado = 1;
+        }
+        else if(escolha == 2)
+        {
+            estado = 100;
+        }
+        escolha = 0;
+        break;
+
+    case 1:
+        imprimirTela(1);
+        scanf("%i", &escolha);
+        if(escolha == 1)
+        {
+            estado = 2;
+        }
+        else if(escolha == 2)
+        {
+            estado = 0;
+        }
+        else if(escolha == 3)
+        {
+            estado = 100;
+        }
+        escolha = 0;
+        break;
+    case 2:
+        imprimirTela(2);
+        scanf("%i", &escolha);
+        if(escolha == 1)
+        {
+            estado = 0;
+        }
+        else if(escolha == 2)
+        {
+            estado = 1;
+        }
+        else if(escolha == 3)
+        {
+            estado = 100;
+        }
+    default:
+        break;
+    }
+}
+
+}
+
+
+
+//DAQUI PRA BAIXO FORAM OS TESTES DE AULA ATÉ O CODIGO FINAL EM CIMA
+
+// int main(){
+//  char palavra[]="BORA TESTAR";
+//  char *pch;
+//  pch=strtok(palavra," ");
+//  printf("Ponteiro: %s\n", pch);
+// }
+
+// int main(){
+//     char palavra[40];
+//     do
+//     {
+//        printf("ESCREVE QUALQUER PALAVRA\n");
+//     scanf("%s", palavra);
+//     } while (strcmp("noite", palavra) != 0);{
+//         printf("Deu bom negaoun");
+//     }
+// }
+
+// int main(){
+//     char result [40];
+//     char console[40];
+//     char *outra_string = " Eh MEU OVO";
+//     strcpy(result,"BOA");
+//     printf("saida: %s\n", result);
+//     strcat(result," NOUTE");
+//     printf("saida: %s\n", result);
+//     strcat(result, outra_string);
+//     printf("saida: %s\n", result);
+//     printf("ESCREVE QUALQUER COISA AI DOIDAOUN");
+//     scanf("%s", console);
+//     printf("saida: %s\n", console);
+// }
