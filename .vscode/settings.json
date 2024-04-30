@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "Main.C": "cpp"
+        "Main.C": "cpp",
+        "Projeto-Arduino.C": "cpp"
     }
 }
