@@ -15,7 +15,7 @@ typedef struct tela{
 
 TELA tela_1[3]=
 {
-{"--Menu","( )PC e ( )ARDUINO",0,MULT},
+{"--Menu","( )PC e ( )ARDUINO",0,MULT,},
 {"ESCREVA SUA MENSANGE",0},
 {"TELA 3", "1 p/ menu, 2 p/ VOLTAR, 3 Sair",0,MULT},
 };
