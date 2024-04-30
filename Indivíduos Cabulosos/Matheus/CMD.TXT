@@ -1,0 +1,3 @@
+cd /caminho/do/seu/arquivo
+gcc arquivo.c -o executavel
+./executavel

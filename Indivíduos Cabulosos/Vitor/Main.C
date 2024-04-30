@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-   
+#include <string.h> 
 //TESTE DE TELA//
-
-
 typedef enum tipo
 {
     MULT,
@@ -22,7 +19,7 @@ typedef struct tela
 TELA Tela_1[3] =
 {
     {"          ---MENU---", " ( )PC e ( )ARDU", 0, MULT},
-    {"          ---ESCREVA SUA MENSAGEM---", 0},
+    {"          ---ESCREVA SUA MENSAGEM---", 0,MULT},
     {"          ---TELA 3---", "1- p NEMU, 2- p VOLTAR e 3 sair", 0, MULT},
 };
 
@@ -42,8 +39,7 @@ void imprimirTela_2(int ntela)
 {
     system("cls");
     printf("%s\n", Tela_2[ntela].titulo);
-
-
+    printf("%s\n",Tela_2[ntela].info);
 }
 
 int main()
@@ -72,6 +68,5 @@ while(estado != 100){
     default:
         break;
     }
-}
-
+ }
 }
