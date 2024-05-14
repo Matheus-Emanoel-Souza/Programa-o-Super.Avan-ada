@@ -1,72 +1,113 @@
-#include <LiquidCrystal.h>
+#include<LiquidCrystal.h>
 
-// Definição dos tipos de tela
-typedef enum tipo {
-    MULT,
-    TEXT
-} TIPOTELA;
-
-// Definição da estrutura de tela
-typedef struct tela {
-    char titulo[40];
-    char info[45];
-    int opcao;
-    TIPOTELA tipo_tela;
-} TELA;
-
-// Definição das telas Tela_1 e Tela_2
-TELA Tela_1[3] = {
-    {"          ---MENU---", " ( )PC e ( )ARDU", 0, MULT},
-    {"          ---ESCREVA SUA MENSAGEM---", "", 0, TEXT},
-    {"          ---TELA 3---", "1- p NEMU, 2- p VOLTAR e 3 sair", 0, MULT},
-};
-
-TELA Tela_2[2] = {
-    {"          ---AGUARDANDO---", "", 0, TEXT},
-    {"          ---MENSAGEM RECEBIDA---", "", 0, TEXT},
-};
-
-// Inicialização do objeto LiquidCrystal
 LiquidCrystal lcd_1(2, 3, 4, 5, 6, 7);
 
-bool status_b1 = false;
-bool status_b2 = false;
+char vogais[] = {'a', 'e', 'i', 'o', 'u'};
+int ind = 0;
+char vogais_selecionadas[5];
+int vogais_count = 0;
 
-void imprimirTela_1(int ntela) {
-
-  lcd_1.setCursor(0, 0); // Posiciona o cursor na primeira linha, primeira coluna
-  lcd_1.print("BEM VINDO"); // Imprime "BEM VINDO" na primeira linha
- 
-
-  lcd_1.clear(); // Limpa o display LCD
-  lcd_1.setCursor(0, 0); // Posiciona o cursor na primeira linha, primeira coluna
-  lcd_1.print(Tela_1[ntela].titulo); // Imprime o título da tela
-  lcd_1.setCursor(0, 1); // Posiciona o cursor na segunda linha, primeira coluna
-  lcd_1.print(Tela_1[ntela].info); // Imprime a informação da tela
-}
+#define BOTAO_NAVE 8
+#define BOTAO_CONF 9
 
 void setup() {
   Serial.begin(9600);
-  lcd_1.begin(16, 2); // Inicialização do LCD com 16 colunas e 2 linhas
+  lcd_1.begin(16, 2);
 
-  pinMode(8, INPUT); // Define o pino do botão 1 como entrada
-  pinMode(9, INPUT); // Define o pino do botão 2 como entrada
+  pinMode(BOTAO_NAVE, INPUT);
+  pinMode(BOTAO_CONF, INPUT);
 
+  Menu();
 }
 
+void loop() {
+  Menu();
+}
 
+void Menu() {
+  lcd_1.setCursor(3, 0);
+  lcd_1.print("BEM VINDO");
+  lcd_1.setCursor(2, 1);
+  lcd_1.print("1-PC 2-ARDU ");
 
-int main() {
-  status_b1 = digitalRead(8);
-  status_b2 = digitalRead(9);
-
-  lcd_1.setCursor(5, 0); // Posiciona o cursor na primeira linha, primeira coluna
-  lcd_1.print("BEM VINDO"); // Imprime "BEM VINDO" na primeira linha
-  lcd_1.setCursor(1, 2); // Posiciona o cursor na primeira linha, primeira coluna
-  lcd_1.print("(1)INICIAR"); // Imprime "BEM VINDO" na primeira linha
-	
-  if (status_b1 != 0) { // Verifica se o botão 1 foi pressionado
-     lcd_1.clear();     
-		imprimirTela_1(0); // Imprime a tela 1
+  if (digitalRead(BOTAO_NAVE) == HIGH) {
+    prepararParaPC();
   }
+  if (digitalRead(BOTAO_CONF) == HIGH) {
+    escolherVogais();
+  }
+}
+
+void prepararParaPC() {
+  lcd_1.clear();
+  lcd_1.print("Esperando...");
+  Serial.print("DIGITE SUA MENSAGEM");
+
+  while (!Serial.available()) {
+    delay(100);
+  }
+
+  String mensagem = Serial.readString();
+  Serial.println(mensagem);
+
+  lcd_1.clear();
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("MSG RECEBIDA:");
+  lcd_1.setCursor(3, 1);
+  lcd_1.print(mensagem);
+  delay(7500);
+  lcd_1.clear();
+  loop();
+}
+
+void escolherVogais() {
+  lcd_1.clear();
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("ESCREVA");
+  lcd_1.setCursor(0, 1);
+  lcd_1.print(vogais[ind]);
+  delay(1000);
+
+  bool escolhaConcluida = false;
+
+  while (!escolhaConcluida) {
+    if (digitalRead(BOTAO_NAVE) == HIGH) {
+      ind = (ind + 1) % 5;
+      lcd_1.setCursor(0, 1);
+      lcd_1.print(vogais[ind]);
+      delay(1000);
+    }
+
+    if (digitalRead(BOTAO_CONF) == HIGH) {
+      vogais_selecionadas[vogais_count] = vogais[ind];
+      vogais_count++;
+
+      if (vogais_count == 5) {
+        lcd_1.clear();
+        lcd_1.setCursor(0, 0);
+        lcd_1.print("FOI ENVIADO");
+        lcd_1.setCursor(0, 1);
+        lcd_1.print("MSG: ");
+
+        Serial.println(" ");
+        for (int i = 0; i < 5; i++) {
+          lcd_1.print(vogais_selecionadas[i]);
+          Serial.print(vogais_selecionadas[i]);
+        }
+        delay(7500);
+        lcd_1.clear();
+        loop();
+        escolhaConcluida = true;
+      }
+
+      while (digitalRead(BOTAO_CONF) == HIGH) {
+        delay(50);
+      }
+    }
+  }
+  for (int i = 0; i < 5; i++) {
+    vogais_selecionadas[i] = '\0';
+    Serial.print(vogais_selecionadas[i]);
+  }
+  vogais_count = 0;
 }
