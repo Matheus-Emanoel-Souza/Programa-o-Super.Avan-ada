@@ -55,7 +55,9 @@ void prepararParaPC(){   //ESPERA A MENSAGEM SER ESCRITA PELO PC
   // Lê mensagem da porta serial
   String mensagem = Serial.readString();
   
-  // Exibe mensagem no LCD
+  int index = mensagem.indexOf("\n");
+  mensagem.remove(index);
+    // Exibe mensagem no LCD
   lcd_1.clear();
   lcd_1.print(mensagem);
   Serial.println(mensagem);
@@ -82,7 +84,7 @@ bool escolhaConcluida = false; // Flag para indicar se a escolha das vogais foi 
       ind= (ind + 1)%5;
   
       // Atualiza o display LCD com a nova letra
-      lcd_1.setCursor(0, 1);
+      lcd_1.setCursor(vogais_count, 1);
       lcd_1.print(vogais[ind]);
       delay(1000); // debounce
     }
@@ -92,6 +94,8 @@ bool escolhaConcluida = false; // Flag para indicar se a escolha das vogais foi 
       // Adiciona a letra selecionada ao vetor de letras selecionadas
      vogais_selecionadas[vogais_count] = vogais[ind];
       vogais_count++;
+      lcd_1.setCursor(vogais_count, 1);
+      lcd_1.print(vogais[ind]);
       
       
       // Se já foram selecionadas 5 letras, exibe na segunda linha do display
