@@ -1,8 +1,0 @@
-cd /caminho/do/seu/arquivo
-gcc arquivo.c -o executavel
-./executavel
-
-    Bibliotecas usadas:
-    #include <liquidcrystal>
-
-https://www.arduinolibraries.info/libraries/liquid-crystal
