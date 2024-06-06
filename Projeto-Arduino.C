@@ -1,41 +1,130 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include<string.h>
+#include <LiquidCrystal.h>
 
-typedef enum tipo{
-    MULT,TEXT
-}TIPOTELA;
+LiquidCrystal lcd_1(2, 3, 4, 5, 6, 7);
 
-typedef struct tela{
-    char titulo[40];
-    char info[45];
-    int opcao;
-    TIPOTELA tipo;
-}TELA;
-//Aqui estou tentando copiar a lógica de "Classe" que se utiliza em C#. A classe apresentará essas seguintes informações -> um titulo, uma informação e o numero da opção.
+#define BOTAO_NAVE 8
+#define BOTAO_CONF 9
 
-TELA tela_1[3]=
-{
-{"--Menu\n","( )PC e ( )ARDUINO",0,MULT},
-};
+void setup() {
+  Serial.begin(9600);
+  lcd_1.begin(16, 2); // Inicialização do LCD com 16 colunas e 2 linhas
+ 
+  pinMode(BOTAO_NAVE, INPUT); // Define o pino do botão de navegação como entrada
+  pinMode(BOTAO_CONF, INPUT); // Define o pino do botão de confirmação como entrada
 
-TELA tela_2[3]=
-{
-{"Escolha uma Opção:\n","( )ENVIAR MENSAGEM  ( )RECEBER MENSAGEM",0,MULT}
-};
-
-TELA tela_3[3]=
-{
-{"ENVIAR MENSAGEM:\n:","1- P/ Escrever, 2-P/ Confirmar",0,MULT}
-};
-
-TELA tela_4[3]=
-{
-{"ler mensagem","Mensangem:",0,TEXT}
-};
-
-void main()
-{
-  
+  Menu(0);
 }
-//aperta o otão 1 vez para selecionar e 2 para confirmar a opção!!!
+
+
+void loop() {
+  Menu(0);
+}
+
+void Menu(int ind) {
+  char vogais[] = {'a', 'e', 'i', 'o', 'u'};
+  lcd_1.setCursor(3, 0); // Posiciona o cursor na primeira linha, quarta coluna
+  lcd_1.print("BEM VINDO"); // Imprime "BEM VINDO" na primeira linha
+  lcd_1.setCursor(2, 1); // Posiciona o cursor na segunda linha, terceira coluna
+  lcd_1.print("1-PC 2-ARDU "); // Imprime "1-PC 2-ARDU" na segunda linha
+  
+  if (digitalRead(BOTAO_NAVE) == HIGH) {
+    prepararParaPC();
+  }
+  if (digitalRead(BOTAO_CONF) == HIGH) {
+    escolherVogais(0);
+  }
+}
+
+void prepararParaPC() {
+  lcd_1.clear();
+  lcd_1.print("Esperando...");
+  
+  // Aguarda mensagem pela porta serial
+  String mensagem = readSerialMessage();
+  
+  // Exibe mensagem no LCD
+  lcd_1.clear();
+  lcd_1.print(mensagem);
+  Serial.println(mensagem);
+  delay(7500);
+  lcd_1.clear();
+}
+
+String readSerialMessage() {
+  String message = "";
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      break; // Termina a leitura quando um caractere de nova linha é recebido
+    }
+    message += c; // Adiciona o caractere à mensagem
+  }
+  return message;
+}
+
+void escolherVogais(int ind) {
+  char vogais[] = {'a', 'e', 'i', 'o', 'u'};
+  int vogais_count = 0;
+  char vogais_selecionadas[5];
+  bool escolhaConcluida = false;
+
+  lcd_1.clear();
+  lcd_1.setCursor(0, 0);
+  lcd_1.print("ESCREVA");
+  lcd_1.setCursor(0, 1);
+  lcd_1.print(vogais[ind]);
+  delay(1000);
+
+  while (!escolhaConcluida) {
+    // Verifica se o botão de navegação foi pressionado
+    if (digitalRead(BOTAO_NAVE) == HIGH) {
+      // Incrementa o índice
+      ind = (ind + 1) % 5;
+  
+      // Atualiza o display LCD com a nova letra
+      lcd_1.setCursor(vogais_count, 1);
+      lcd_1.print(vogais[ind]);
+      delay(1000); // debounce
+    }
+    	
+    // Verifica se o botão de confirmação foi pressionado
+    if (digitalRead(BOTAO_CONF) == HIGH) {
+      // Adiciona a letra selecionada ao vetor de letras selecionadas
+      vogais_selecionadas[vogais_count] = vogais[ind];
+      vogais_count++;
+      lcd_1.setCursor(vogais_count, 1);
+      lcd_1.print(vogais[ind]);
+      
+      // Se já foram selecionadas 5 letras, exibe na segunda linha do display
+      if (vogais_count == 5) {
+        lcd_1.clear();
+        lcd_1.setCursor(0, 0);
+        lcd_1.print("FOI ENVIADO");
+        lcd_1.setCursor(0, 1);
+        lcd_1.print("MSG: ");
+	
+        Serial.println(" ");
+        for (int i = 0; i < 5; i++) {
+          lcd_1.print(vogais_selecionadas[i]);
+          Serial.print(vogais_selecionadas[i]);
+        }
+        delay(7500);
+        lcd_1.clear();
+        escolhaConcluida = true;
+      }
+      
+      // Aguarda até que o botão seja solto para evitar múltiplas inserções
+      while (digitalRead(BOTAO_CONF) == HIGH) {
+        delay(100);
+      }
+    }
+  }
+  
+  // Limpa o vetor de vogais selecionadas
+  for (int i = 0; i < 5; i++) {
+    vogais_selecionadas[i] = '\0';
+  }
+  
+  // Reinicia o contador de vogais selecionadas
+  vogais_count = 0;
+}
