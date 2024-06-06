@@ -3,14 +3,10 @@
 #include <string.h>
 #include <windows.h>
 #include <stdbool.h>
+#include <time.h>  
 
 #define BOTAO_NAVE 8
 #define BOTAO_CONF 9
-
-
-
-
-int vogais_count = 0;
 
 HANDLE hSerial;
 
@@ -22,7 +18,7 @@ void iniciarSerial();
 void fecharSerial();
 void enviarDados(const char *data);
 void receberDados(char *buffer, int length);
-void delay();
+void delay(unsigned int milliseconds);  // Ajustado para definir o tipo de argumento
 
 int main() {
     iniciarSerial();
@@ -36,7 +32,7 @@ int main() {
 
 void delay(unsigned int milliseconds) {
     clock_t start_time = clock();
-    while (clock() < start_time + milliseconds);
+    while (clock() < start_time + milliseconds * CLOCKS_PER_SEC / 1000);
 }
 
 void iniciarSerial() {
@@ -109,7 +105,6 @@ void receberDados(char *buffer, int length) {
 
 void setup() {
     printf("Inicialização\n");
-    
     Menu();
 }
 
@@ -122,10 +117,6 @@ void Menu() {
     printf("-----BEM VINDO-----\n");
     printf("1-ENVIAR 2-RECEBER\n");
 
-    int botaoNave = 0;
-    int botaoConf = 0;
-
-
     int escolha;
     scanf("%d", &escolha);
 
@@ -134,11 +125,9 @@ void Menu() {
     } else if (escolha == 2) {
         escrevermensagem();
     }
-
 }
 
 void prepararParaPC() {
-    
     char mensagem[32];
     receberDados(mensagem, 32);
     printf("Mensagem recebida: %s\n", mensagem);
@@ -147,15 +136,12 @@ void prepararParaPC() {
 }
 
 void escrevermensagem() {
-    
- 
     bool escolhaConcluida = false;
 
     while (!escolhaConcluida) {
-       
         char escolha[16];
         scanf("%s", escolha);
-      
+
         int vogais_count = 5;
         if (vogais_count == 5) {
             printf("FOI ENVIADO\n");
@@ -164,8 +150,5 @@ void escrevermensagem() {
             escolhaConcluida = true;
             break;
         }
-        
     }
-
-    
 }
