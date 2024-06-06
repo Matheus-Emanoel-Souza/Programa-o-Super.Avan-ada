@@ -7,9 +7,9 @@
 #define BOTAO_NAVE 8
 #define BOTAO_CONF 9
 
-char vogais[] = {'a', 'e', 'i', 'o', 'u'};
-int ind = 0;
-char vogais_selecionadas[5];
+
+
+
 int vogais_count = 0;
 
 HANDLE hSerial;
@@ -18,11 +18,11 @@ void setup();
 void loop();
 void Menu();
 void prepararParaPC();
-void escolherVogais();
 void iniciarSerial();
 void fecharSerial();
 void enviarDados(const char *data);
 void receberDados(char *buffer, int length);
+void delay();
 
 int main() {
     iniciarSerial();
@@ -32,6 +32,11 @@ int main() {
     }
     fecharSerial();
     return 0;
+}
+
+void delay(unsigned int milliseconds) {
+    clock_t start_time = clock();
+    while (clock() < start_time + milliseconds);
 }
 
 void iniciarSerial() {
@@ -66,7 +71,7 @@ void iniciarSerial() {
     dcbSerialParams.Parity = NOPARITY;
 
     if (!SetCommState(hSerial, &dcbSerialParams)) {
-        printf("Error setting device parameters\n");
+        printf("Erro ao definir parâmetros do dispositivo\n");
         exit(EXIT_FAILURE);
     }
 
@@ -78,7 +83,7 @@ void iniciarSerial() {
     timeouts.WriteTotalTimeoutMultiplier = 10;
 
     if (!SetCommTimeouts(hSerial, &timeouts)) {
-        printf("Error setting timeouts\n");
+        printf("Erro ao definir tempos limite\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -90,55 +95,50 @@ void fecharSerial() {
 void enviarDados(const char *data) {
     DWORD bytes_written;
     if (!WriteFile(hSerial, data, strlen(data), &bytes_written, NULL)) {
-        printf("Error writing to serial port\n");
+        printf("Erro ao gravar na porta serial\n");
     }
 }
 
 void receberDados(char *buffer, int length) {
     DWORD bytes_read;
     if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
-        printf("Error reading from serial port\n");
+        printf("Erro ao ler a partir da porta serial\n");
     }
     buffer[bytes_read] = '\0';
 }
 
 void setup() {
     printf("Inicialização\n");
+    
     Menu();
 }
 
 void loop() {
+    delay(1000);
     Menu();
 }
 
 void Menu() {
-    printf("BEM VINDO\n");
-    printf("1-PC 2-ARDU\n");
+    printf("-----BEM VINDO-----\n");
+    printf("1-ENVIAR 2-RECEBER\n");
 
     int botaoNave = 0;
     int botaoConf = 0;
 
-  //  printf("Pressione 1 para BOTAO_NAVE ou 2 para BOTAO_CONF: ");
+
     int escolha;
     scanf("%d", &escolha);
 
     if (escolha == 1) {
-        botaoNave = 1;
+       prepararParaPC();
     } else if (escolha == 2) {
-        botaoConf = 1;
+        escrevermensagem();
     }
 
-    if (botaoNave) {
-        prepararParaPC();
-    }
-    if (botaoConf) {
-        escolherVogais();
-    }
 }
 
 void prepararParaPC() {
-    printf("Esperando...\n");
-
+    
     char mensagem[32];
     receberDados(mensagem, 32);
     printf("Mensagem recebida: %s\n", mensagem);
@@ -146,50 +146,26 @@ void prepararParaPC() {
     printf("\n");
 }
 
-void escolherVogais() {
-    printf("ESCREVA: %c\n", vogais[ind]);
-
+void escrevermensagem() {
+    
+ 
     bool escolhaConcluida = false;
 
     while (!escolhaConcluida) {
-        // int botaoNave = 0;
-        // int botaoConf = 0;
-
-        // printf("Pressione 1 para BOTAO_NAVE ou 2 para BOTAO_CONF: ");
-        // int escolha;
+       
         char escolha[16];
         scanf("%s", escolha);
-        // // printf("Msg enviada: %s", escolha);
-        // // enviarDados(escolha);
-        // // escolhaConcluida = true;
-        // if (escolha == 1) {
-        //     botaoNave = 1;
-        // } else if (escolha == 2) {
-        //     botaoConf = 1;
-        // }
-
-        // if (botaoNave) {
-        //     ind = (ind + 1) % 5;
-        //     printf("ESCREVA: %c\n", vogais[ind]);
-        // }
-
-        // if (botaoConf) {
-        //     vogais_selecionadas[vogais_count] = vogais[ind];
-        //     vogais_count++;
-        //     printf("Vogais Selecionadas: %s\n", vogais_selecionadas);
-        vogais_count = 5;
+      
+        int vogais_count = 5;
         if (vogais_count == 5) {
             printf("FOI ENVIADO\n");
-            printf("MSG: %s\n", vogais_selecionadas);
+            printf("MSG: %s\n", escolha);
             enviarDados(escolha);
             escolhaConcluida = true;
             break;
         }
-        // }
+        
     }
 
-    for (int i = 0; i < 5; i++) {
-        vogais_selecionadas[i] = '\0';
-    }
-    vogais_count = 0;
+    
 }
