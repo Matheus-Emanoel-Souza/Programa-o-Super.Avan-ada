@@ -2,5 +2,6 @@
     "files.associations": {
         "Main.C": "cpp",
         "Projeto-Arduino.C": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

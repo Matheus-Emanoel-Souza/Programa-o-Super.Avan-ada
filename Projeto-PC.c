@@ -8,6 +8,66 @@
 #define BOTAO_NAVE 8
 #define BOTAO_CONF 9
 
+typedef struct enum {
+    Arduino,
+    pc;}Remetente;
+
+typedef struct mensage
+{
+    char msg[36];
+    Remetente Remet;
+    //bool EnviadoPeloArduino;   
+} mensage;
+
+No CriaNoRecebido(mensage msg)
+{
+    No NovoNo;
+    NovoNo.msg = msg.msg;
+    NovoNo.next = NULL;
+    NovoNo.msg.Remet = 0;
+    return NovoNo;
+}
+No CriaNoEnviado(mensage msg)
+{
+    No NovoNo;
+    NovoNo.msg = msg.msg;
+    NovoNo.next = NULL;
+    NovoNo.msg.Remet = 1;
+    return NovoNo;
+}
+typedef struct No 
+{
+    mensage msg;             
+    struct No* next;    
+} No;
+typedef struct Lista
+{
+    No*primeiro;
+    No*ultimo;
+    No*marcador;
+    int contador;
+}Lista;
+
+Lista cria_lista()
+{
+    Lista nova_lista={NULL, NULL,NULL,0};
+    return nova_lista;
+}
+
+void add_na_lista(No* no, Lista* lista)
+{
+if (lista->contador == 0)
+{
+    lista->primeiro = no;
+    lista->marcador = no;
+}
+else{
+    lista->marcador->next = no;
+}
+lista->contador++;
+}
+
+
 HANDLE hSerial;
 
 void setup();
@@ -20,11 +80,14 @@ void enviarDados(const char *data);
 void receberDados(char *buffer, int length);
 void delay(unsigned int milliseconds);  // Ajustado para definir o tipo de argumento
 
-int main() {
+int main() 
+{
     iniciarSerial();
     setup();
+    Lista HistoricoMsg = cria_lista();
     while (1) {
-        loop();
+        loop(HistoricoMsg);
+        //Emprimir Lista.
     }
     fecharSerial();
     return 0;
@@ -108,12 +171,12 @@ void setup() {
     Menu();
 }
 
-void loop() {
+void loop(Lista HistoricoMsg) {
     delay(1000);
-    Menu();
+    Menu(HistoricoMsg);
 }
 
-void Menu() {
+void Menu(Lista HistoricoMsg) {
     printf("-----BEM VINDO-----\n");
     printf("1-ENVIAR 2-RECEBER\n");
 
@@ -121,21 +184,23 @@ void Menu() {
     scanf("%d", &escolha);
 
     if (escolha == 1) {
-       prepararParaPC();
+       prepararParaPC(HistoricoMsg);
     } else if (escolha == 2) {
-        escrevermensagem();
+        escrevermensagem(HistoricoMsg);
     }
 }
 
-void prepararParaPC() {
+void prepararParaPC(Lista HistoricoMsg) {
     char mensagem[32];
     receberDados(mensagem, 32);
     printf("Mensagem recebida: %s\n", mensagem);
     enviarDados(mensagem);
+    No Msg_Enviada = CriaNoRecebido(mensagem);
+    add_na_lista(Msg_Enviada,HistoricoMsg);
     printf("\n");
 }
 
-void escrevermensagem() {
+void escrevermensagem(Lista HistoricoMsg) {
     bool escolhaConcluida = false;
 
     while (!escolhaConcluida) {
@@ -146,6 +211,8 @@ void escrevermensagem() {
         if (vogais_count == 5) {
             printf("FOI ENVIADO\n");
             printf("MSG: %s\n", escolha);
+            No Msg_Enviada = CriaNoEnviado(escolha);
+            add_na_lista(Msg_Enviada,HistoricoMsg);
             enviarDados(escolha);
             escolhaConcluida = true;
             break;
