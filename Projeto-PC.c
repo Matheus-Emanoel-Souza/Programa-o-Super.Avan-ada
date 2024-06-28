@@ -85,7 +85,6 @@ int main()
 {
     iniciarSerial();
     setup();
-    Lista HistoricoMsg = cria_lista();
     while (1) {
         loop(HistoricoMsg);
         //Emprimir Lista.
@@ -173,7 +172,8 @@ void setup() {
     Menu();
 }
 
-void loop(Lista HistoricoMsg) {
+void loop() {
+    Lista HistoricoMsg = cria_lista();
     delay(1000);
     Menu(HistoricoMsg);
 }
