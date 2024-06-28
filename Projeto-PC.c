@@ -10,7 +10,8 @@
 
 typedef struct enum {
     Arduino,
-    pc;}Remetente;
+    pc;
+    }Remetente;
 
 typedef struct mensage
 {
@@ -89,6 +90,7 @@ int main()
         loop(HistoricoMsg);
         //Emprimir Lista.
     }
+
     fecharSerial();
     return 0;
 }
@@ -199,7 +201,6 @@ void prepararParaPC(Lista HistoricoMsg) {
     add_na_lista(Msg_Enviada,HistoricoMsg);
     printf("\n");
 }
-
 void escrevermensagem(Lista HistoricoMsg) {
     bool escolhaConcluida = false;
 
@@ -218,4 +219,26 @@ void escrevermensagem(Lista HistoricoMsg) {
             break;
         }
     }
+}
+void ImprimeMsg(mensage msg)
+{
+    printf("------------------------\n");
+    if (msg.Remet == 0)
+    {
+        printf("Fonte: Arduino");
+    }
+    else{
+        printf("Fonte: PC");
+    }
+    printf("Mensagem:%s",msg.msg);
+}
+void ExibirHistórico(Lista lista)
+{
+    lista.marcador = lista.primeiro;
+    while (lista.marcador != NULL)
+    {
+        ImprimeMsg(lista.marcador->msg)
+        lista.marcador = lista.marcador->next;
+    }
+    
 }
