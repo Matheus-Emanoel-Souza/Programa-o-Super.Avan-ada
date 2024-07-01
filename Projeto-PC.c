@@ -157,18 +157,23 @@ void menu(Lista* historico_msg, HANDLE hSerial);
 void preparar_para_pc(Lista* historico_msg, HANDLE hSerial);
 void escrever_mensagem(Lista* historico_msg, HANDLE hSerial);
 
-void loop(Lista* historico_msg, HANDLE hSerial) {
+void loop(Lista* historico_msg, HANDLE hSerial, int* continuar_execucao) {
     delay_ms(1000);
-    menu(historico_msg, hSerial);
+    menu(historico_msg, hSerial, continuar_execucao);
 }
 
-void menu(Lista* historico_msg, HANDLE hSerial) {
+void menu(Lista* historico_msg, HANDLE hSerial, int* continuar_execucao) {
     printf("-----BEM VINDO-----\n");
-    printf("1-ENVIAR 2-RECEBER\n");
+    printf("0-Sair 1-ENVIAR 2-RECEBER\n");
 
     int escolha;
     scanf("%d", &escolha);
-
+    
+    if (escolha == 0) {
+        *continuar_execucao = 0; // Sinaliza para sair do loop
+        return;
+    }  
+    
     if (escolha == 1) {
         preparar_para_pc(historico_msg, hSerial);
     } else if (escolha == 2) {
@@ -209,9 +214,13 @@ int main() {
     HANDLE hSerial = iniciar_serial();
     setup();
     Lista historico_msg = cria_lista();
-    while (1) {
-        loop(&historico_msg, hSerial);
+    int continuar_execucao = 1;
+    
+    while (continuar_execucao) {
+        loop(&historico_msg, hSerial, &continuar_execucao);
     }
+    
+    exibir_historico(hSerial);
     fechar_serial(hSerial);
     return 0;
 }
