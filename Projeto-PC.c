@@ -210,17 +210,30 @@ void escrever_mensagem(Lista* historico_msg, HANDLE hSerial) {
     }
 }
 
+// int main() {
+//     HANDLE hSerial = iniciar_serial();
+//     setup();
+//     Lista historico_msg = cria_lista();
+//     int continuar_execucao = 1;
+    
+//     while (continuar_execucao) {
+//         loop(&historico_msg, hSerial, &continuar_execucao);
+//     }
+    
+//     exibir_historico(hSerial);
+//     fechar_serial(hSerial);
+//     return 0;
+// }
 int main() {
-    HANDLE hSerial = iniciar_serial();
     setup();
     Lista historico_msg = cria_lista();
     int continuar_execucao = 1;
     
     while (continuar_execucao) {
-        loop(&historico_msg, hSerial, &continuar_execucao);
+        loop(&historico_msg, NULL, &continuar_execucao);  // Passando NULL para hSerial
     }
     
-    exibir_historico(hSerial);
-    fechar_serial(hSerial);
+    exibir_historico(historico_msg);  // Exibindo histórico sem depender de hSerial
+    
     return 0;
 }

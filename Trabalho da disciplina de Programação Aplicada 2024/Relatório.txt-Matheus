@@ -1,0 +1,39 @@
+Relatório do Trabalho de Programação Aplicada
+Professor: Anderson Sacheto
+Grupo de Trabalho
+Este relatório aborda o progresso e as atividades realizadas pelo grupo composto por Matheus Emanoel, Weverton, Gabriel e Victor Fraga no âmbito da disciplina de Programação Aplicada. O objetivo principal do grupo é desenvolver e colaborar em um projeto utilizando as habilidades e conceitos aprendidos ao longo do curso.
+
+Objetivo do Projeto
+Desenvolver um sistema de comunicação bidirecional entre um Arduino e um PC, utilizando um display LCD 16x2 e dois pushbuttons. O sistema permitirá ao usuário escolher entre duas opções principais: enviar uma mensagem do Arduino para o PC ou receber uma mensagem do PC no Arduino.
+
+Atividades Realizadas
+Criação do Repositório no GitHub
+No dia 22 de abril, foi criado um repositório no GitHub para facilitar a colaboração e a gestão do código fonte do projeto. Esse repositório serve como plataforma central para que os membros do grupo possam interagir, revisar e contribuir com o código uns dos outros.
+
+Desenvolvimento do Trabalho
+Primeira Etapa: Montagem dos Circuitos Elétricos
+Na primeira fase do projeto, foi realizada a montagem dos circuitos elétricos no Arduino. O foco desta etapa foi criar a base do sistema, permitindo que o Arduino enviasse mensagens para uma porta serial, sem ainda estabelecer a comunicação completa com o PC. A montagem incluiu:
+
+Conexão do display LCD 16x2 ao Arduino.
+Configuração de dois pushbuttons para selecionar entre enviar e receber mensagens.
+Programação inicial para enviar uma mensagem simples via porta serial.
+Segunda Etapa: Implementação da Comunicação Arduino-PC e Interface Gráfica
+A segunda etapa foi crucial para o avanço do projeto. Além de estabelecer a comunicação bidirecional entre o Arduino e o PC e a transição fluida entre as funções de envio e recebimento de mensagens, foi desenvolvida uma interface gráfica simples para o PC. As principais melhorias incluíram:
+
+Configuração da porta serial no PC para receber e enviar mensagens do Arduino.
+Desenvolvimento da interface gráfica para permitir visualização e envio de mensagens pelo usuário.
+Ajustes nas funções do Arduino para garantir eficiência na comunicação e na transição entre telas no display LCD.
+Terceira Etapa: Finalização Estética e Refinamento do Código
+Na fase final do trabalho, o grupo focou no acabamento estético e no refinamento do código. As principais melhorias foram:
+
+Integração estética dos componentes do sistema para uma montagem organizada.
+Otimização do código para melhorar a fluidez e a responsividade do sistema.
+Implementação de uma lista encadeada para gerenciar e exibir o histórico de mensagens de forma eficiente.
+Conclusão
+O desenvolvimento do sistema de comunicação bidirecional entre Arduino e PC foi concluído com sucesso, graças ao trabalho colaborativo e às etapas bem definidas realizadas pelo grupo. Cada fase do projeto contribuiu significativamente para o aprendizado e aplicação prática dos conceitos estudados. Este relatório reflete o progresso e as realizações alcançadas ao longo do trabalho, destacando os avanços técnicos e as melhorias implementadas no sistema.
+
+Referências
+Documentação oficial do Arduino.
+Materiais de apoio fornecidos pelo professor Anderson Sacheto.
+Tutoriais e artigos sobre desenvolvimento de sistemas Arduino-PC e interface gráfica.
+Este relatório documenta de forma abrangente o projeto desenvolvido pelo grupo na disciplina de Programação Aplicada, ressaltando os resultados obtidos e o processo colaborativo adotado.
