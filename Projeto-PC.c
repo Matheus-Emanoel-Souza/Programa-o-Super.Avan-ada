@@ -29,6 +29,171 @@ typedef struct {
     int contador;
 } Lista;
 
+HANDLE hSerial;
+
+Lista cria_lista();
+No* cria_no(Mensage msg, Remetente remet);
+void add_na_lista(No* no, Lista* lista);
+void imprime_msg(Mensage msg);
+void exibir_historico(Lista lista);
+void delay(unsigned int milliseconds);
+void iniciarSerial();
+void fecharSerial();
+void enviarDados(const char *data);
+void receberDados(char *buffer, int length);
+void setup();
+void loop();
+void Menu();
+void prepararParaPC(Lista *Exibir_historicoMSG);
+void escrevermensagem(Lista *Exibir_historicoMSG);
+
+void delay(unsigned int milliseconds) {
+    clock_t start_time = clock();
+    while (clock() < start_time + milliseconds * CLOCKS_PER_SEC / 1000);
+}
+
+void iniciarSerial() {
+    hSerial = CreateFile(
+        "COM7",
+        GENERIC_READ | GENERIC_WRITE,
+        0,
+        0,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        0
+    );
+
+    if (hSerial == INVALID_HANDLE_VALUE) {
+        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
+            printf("A porta serial não existe!\n");
+        } else {
+            printf("Erro ao inicializar a porta serial\n");
+        }
+        exit(EXIT_FAILURE);
+    }
+
+    DCB dcbSerialParams = {0};
+    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+    if (!GetCommState(hSerial, &dcbSerialParams)) {
+        printf("Erro ao obter o estado do dispositivo\n");
+        exit(EXIT_FAILURE);
+    }
+
+    dcbSerialParams.BaudRate = CBR_9600;
+    dcbSerialParams.ByteSize = 8;
+    dcbSerialParams.StopBits = ONESTOPBIT;
+    dcbSerialParams.Parity = NOPARITY;
+
+    if (!SetCommState(hSerial, &dcbSerialParams)) {
+        printf("Erro ao definir os parâmetros do dispositivo\n");
+        exit(EXIT_FAILURE);
+    }
+
+    COMMTIMEOUTS timeouts = {0};
+    timeouts.ReadIntervalTimeout = 50;
+    timeouts.ReadTotalTimeoutConstant = 50;
+    timeouts.ReadTotalTimeoutMultiplier = 10;
+    timeouts.WriteTotalTimeoutConstant = 50;
+    timeouts.WriteTotalTimeoutMultiplier = 10;
+
+    if (!SetCommTimeouts(hSerial, &timeouts)) {
+        printf("Erro ao definir os tempos limite\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void fecharSerial() {
+    CloseHandle(hSerial);
+}
+
+void enviarDados(const char *data) {
+    DWORD bytes_written;
+    if (!WriteFile(hSerial, data, strlen(data), &bytes_written, NULL)) {
+        printf("Erro ao escrever na porta serial\n");
+    }
+}
+
+void receberDados(char *buffer, int length) {
+    DWORD bytes_read;
+    if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
+        printf("Erro ao ler a partir da porta serial\n");
+    }
+    buffer[bytes_read] = '\0';
+}
+
+void setup() {
+    printf("Inicialização\n");
+    Menu();
+}
+
+void loop() {
+    delay(1000);
+    Menu();
+}
+
+void Menu() {
+    Lista Exibir_historicoMSG = cria_lista();
+    printf("-----BEM VINDO-----\n");
+    printf("1-ENVIAR 2-RECEBER 3-Historico\n");
+
+    int escolha;
+    scanf("%d", &escolha);
+    
+    if (escolha == 1) 
+    {
+        escrevermensagem(&Exibir_historicoMSG);
+    }
+    if (escolha == 2) 
+    {
+        prepararParaPC(&Exibir_historicoMSG);
+    } 
+    if (escolha == 3) 
+    {
+        exibir_historico(Exibir_historicoMSG);
+    }
+
+}
+
+void prepararParaPC(Lista *Exibir_historicoMSG) {
+    char mensagem[32];
+    receberDados(mensagem, 32);
+    printf("Mensagem recebida: %s\n", mensagem);
+    enviarDados(mensagem);
+    
+    // Criar nó e adicionar à lista
+    Mensage msg;
+    strcpy(msg.msg, mensagem);
+    msg.remet = Arduino;
+    No* novo_no = cria_no(msg, Arduino);
+    add_na_lista(novo_no, Exibir_historicoMSG);
+    
+    printf("\n");
+}
+
+void escrevermensagem(Lista *Exibir_historicoMSG) {
+    bool escolhaConcluida = false;
+
+    while (!escolhaConcluida) {
+        char escolha[36];
+        scanf("%s", escolha);
+
+        if (strlen(escolha) > 0) {
+            printf("FOI ENVIADO\n");
+            printf("MSG: %s\n", escolha);
+            enviarDados(escolha);
+
+            // Criar nó e adicionar à lista
+            Mensage m;
+            strcpy(m.msg, escolha);
+            m.remet = PC;
+            No* novo_no = cria_no(m, PC);
+            add_na_lista(novo_no, Exibir_historicoMSG);
+
+            escolhaConcluida = true;
+        }
+    }
+}
+
 Lista cria_lista() {
     Lista nova_lista = {NULL, NULL, 0};
     return nova_lista;
@@ -71,169 +236,18 @@ void exibir_historico(Lista lista) {
     }
 }
 
-HANDLE iniciar_serial() {
-    HANDLE hSerial = CreateFile(
-        "COM8",
-        GENERIC_READ | GENERIC_WRITE,
-        0,
-        0,
-        OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL,
-        0
-    );
-
-    if (hSerial == INVALID_HANDLE_VALUE) {
-        if (GetLastError() == ERROR_FILE_NOT_FOUND) {
-            printf("Serial port doesn't exist!\n");
-        }
-        printf("Error initializing serial port\n");
-        exit(EXIT_FAILURE);
-    }
-
-    DCB dcbSerialParams = {0};
-    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
-    if (!GetCommState(hSerial, &dcbSerialParams)) {
-        printf("Error getting device state\n");
-        exit(EXIT_FAILURE);
-    }
-
-    dcbSerialParams.BaudRate = CBR_9600;
-    dcbSerialParams.ByteSize = 8;
-    dcbSerialParams.StopBits = ONESTOPBIT;
-    dcbSerialParams.Parity = NOPARITY;
-
-    if (!SetCommState(hSerial, &dcbSerialParams)) {
-        printf("Erro ao definir parâmetros do dispositivo\n");
-        exit(EXIT_FAILURE);
-    }
-
-    COMMTIMEOUTS timeouts = {0};
-    timeouts.ReadIntervalTimeout = 50;
-    timeouts.ReadTotalTimeoutConstant = 50;
-    timeouts.ReadTotalTimeoutMultiplier = 10;
-    timeouts.WriteTotalTimeoutConstant = 50;
-    timeouts.WriteTotalTimeoutMultiplier = 10;
-
-    if (!SetCommTimeouts(hSerial, &timeouts)) {
-        printf("Erro ao definir tempos limite\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    return hSerial;
-}
-
-void fechar_serial(HANDLE hSerial) {
-    CloseHandle(hSerial);
-}
-
-void enviar_dados(HANDLE hSerial, const char *data) {
-    DWORD bytes_written;
-    if (!WriteFile(hSerial, data, strlen(data), &bytes_written, NULL)) {
-        printf("Erro ao gravar na porta serial\n");
-        iniciar_serial();
-    }
-}
-
-void receber_dados(HANDLE hSerial, char *buffer, int length) {
-    DWORD bytes_read;
-    if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
-        printf("Erro ao ler a partir da porta serial\n");
-    }
-    buffer[bytes_read] = '\0';
-}
-
-void delay_ms(unsigned int milliseconds) {
-    clock_t start_time = clock();
-    while (clock() < start_time + milliseconds * CLOCKS_PER_SEC / 1000);
-}
-
-void setup() {
-    printf("Inicialização\n");
-}
-
-// Protótipos das funções
-void loop(Lista* historico_msg, HANDLE hSerial);
-void menu(Lista* historico_msg, HANDLE hSerial);
-void preparar_para_pc(Lista* historico_msg, HANDLE hSerial);
-void escrever_mensagem(Lista* historico_msg, HANDLE hSerial);
-
-void loop(Lista* historico_msg, HANDLE hSerial, int* continuar_execucao) {
-    delay_ms(1000);
-    menu(historico_msg, hSerial, continuar_execucao);
-}
-
-void menu(Lista* historico_msg, HANDLE hSerial, int* continuar_execucao) {
-    printf("-----BEM VINDO-----\n");
-    printf("0-Sair 1-ENVIAR 2-RECEBER\n");
-
-    int escolha;
-    scanf("%d", &escolha);
-    
-    if (escolha == 0) {
-        *continuar_execucao = 0; // Sinaliza para sair do loop
-        return;
-    }  
-    
-    if (escolha == 1) {
-        preparar_para_pc(historico_msg, hSerial);
-    } else if (escolha == 2) {
-        escrever_mensagem(historico_msg, hSerial);
-    }
-}
-
-void preparar_para_pc(Lista* historico_msg, HANDLE hSerial) {
-    char mensagem[32];
-    receber_dados(hSerial, mensagem, 32);
-    printf("Mensagem recebida: %s\n", mensagem);
-    enviar_dados(hSerial, mensagem);
-    Mensage msg = {.remet = Arduino};
-    strncpy(msg.msg, mensagem, sizeof(msg.msg));
-    No* msg_recebida = cria_no(msg, Arduino);
-    add_na_lista(msg_recebida, historico_msg);
-}
-
-void escrever_mensagem(Lista* historico_msg, HANDLE hSerial) {
-    bool escolha_concluida = false;
-
-    while (!escolha_concluida) {
-        char escolha[36];
-        scanf("%s", escolha);
-
-        printf("FOI ENVIADO\n");
-        printf("MSG: %s\n", escolha);
-        Mensage msg = {.remet = PC};
-        strncpy(msg.msg, escolha, sizeof(msg.msg));
-        No* msg_enviada = cria_no(msg, PC);
-        add_na_lista(msg_enviada, historico_msg);
-        enviar_dados(hSerial, escolha);
-        escolha_concluida = true;
-    }
-}
-
-// int main() {
-//     HANDLE hSerial = iniciar_serial();
-//     setup();
-//     Lista historico_msg = cria_lista();
-//     int continuar_execucao = 1;
-    
-//     while (continuar_execucao) {
-//         loop(&historico_msg, hSerial, &continuar_execucao);
-//     }
-    
-//     exibir_historico(hSerial);
-//     fechar_serial(hSerial);
-//     return 0;
-// }
 int main() {
+    iniciarSerial();
     setup();
-    Lista historico_msg = cria_lista();
-    int continuar_execucao = 1;
-    
-    while (continuar_execucao) {
-        loop(&historico_msg, NULL, &continuar_execucao);  // Passando NULL para hSerial
+    bool continua = true;
+
+    while (continua)
+    {
+        loop();  
     }
     
-    exibir_historico(historico_msg);  // Exibindo histórico sem depender de hSerial
-    
+
+
+    fecharSerial();
     return 0;
 }
