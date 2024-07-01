@@ -151,6 +151,12 @@ void setup() {
     printf("Inicialização\n");
 }
 
+// Protótipos das funções
+void loop(Lista* historico_msg, HANDLE hSerial);
+void menu(Lista* historico_msg, HANDLE hSerial);
+void preparar_para_pc(Lista* historico_msg, HANDLE hSerial);
+void escrever_mensagem(Lista* historico_msg, HANDLE hSerial);
+
 void loop(Lista* historico_msg, HANDLE hSerial) {
     delay_ms(1000);
     menu(historico_msg, hSerial);
