@@ -138,18 +138,12 @@ void receberDados(char *buffer, int length) {
     buffer[bytes_read] = '\0';
 }
 
-void setup() {
+void setup(Lista *Exibir_historicoMSG) {
     printf("Inicialização\n");
-    Menu();
+    Menu(Exibir_historicoMSG);
 }
-
-void loop() {
-    delay(1000);
-    Menu();
-}
-
-void Menu() {
-    Lista Exibir_historicoMSG = cria_lista();
+    
+void Menu(Lista *Exibir_historicoMSG) {
     limparEntradaSerial();
     limparSerialMonitor();
     printf("-----BEM VINDO-----\n");
@@ -161,16 +155,16 @@ void Menu() {
     switch (escolha)
     {
     case 1:
-        escrevermensagem(&Exibir_historicoMSG);
-        exibir_historico(&Exibir_historicoMSG);
+        escrevermensagem(Exibir_historicoMSG);
+        exibir_historico(Exibir_historicoMSG);
         break;
     case 2:
-        prepararParaPC(&Exibir_historicoMSG);
-        exibir_historico(&Exibir_historicoMSG); 
+        prepararParaPC(Exibir_historicoMSG);
+        exibir_historico(Exibir_historicoMSG); 
         break;
     case 3:
-        printf("Chegou aqui.")
-        exibir_historico(&Exibir_historicoMSG);
+        printf("Chegou aqui.");
+        exibir_historico(Exibir_historicoMSG);
         break;
     
     default:
@@ -240,13 +234,14 @@ No* cria_no(Mensage msg, Remetente remet) {
 }
 
 void add_na_lista(No* no, Lista* lista) {
+
     if (lista->contador == 0) {
         lista->primeiro = no;
-        lista->ultimo = no;
     } else {
         lista->ultimo->next = no;
-        lista->ultimo = no;
     }
+    lista->marcador=no;
+    lista->ultimo = no;
     lista->contador++;
 }
 
@@ -265,13 +260,15 @@ void exibir_historico(Lista *lista) {
 }
 
 int main() {
+    Lista Exibir_historicoMSG = cria_lista();
     iniciarSerial();
-    setup();
+    setup(&Exibir_historicoMSG);
     bool continua = true;
 
     while (continua)
     {
-        loop();  
+        delay(1000);
+        Menu(&Exibir_historicoMSG);
     }
     
     fecharSerial();
