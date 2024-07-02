@@ -26,6 +26,7 @@ typedef struct No {
 typedef struct {
     No* primeiro;
     No* ultimo;
+    No* marcador;
     int contador;
 } Lista;
 
@@ -35,7 +36,7 @@ Lista cria_lista();
 No* cria_no(Mensage msg, Remetente remet);
 void add_na_lista(No* no, Lista* lista);
 void imprime_msg(Mensage msg);
-void exibir_historico(Lista lista);
+void exibir_historico(Lista *lista);
 void delay(unsigned int milliseconds);
 void iniciarSerial();
 void fecharSerial();
@@ -46,6 +47,22 @@ void loop();
 void Menu();
 void prepararParaPC(Lista *Exibir_historicoMSG);
 void escrevermensagem(Lista *Exibir_historicoMSG);
+//void limparSerialMonitor();
+
+void limparEntradaSerial() {
+    char buffer[256];
+    DWORD bytes_read;
+
+    // Continue lendo enquanto houver dados na entrada serial
+    while (ReadFile(hSerial, buffer, sizeof(buffer) - 1, &bytes_read, NULL) && bytes_read > 0) {
+        // Fazer nada com os dados lidos
+    }
+}
+
+void limparSerialMonitor() {
+    system("cls");
+    printf("Monitor Serial Limpo\n");
+}
 
 void delay(unsigned int milliseconds) {
     clock_t start_time = clock();
@@ -133,23 +150,32 @@ void loop() {
 
 void Menu() {
     Lista Exibir_historicoMSG = cria_lista();
+    limparEntradaSerial();
+    limparSerialMonitor();
     printf("-----BEM VINDO-----\n");
     printf("1-ENVIAR 2-RECEBER 3-Historico\n");
 
     int escolha;
     scanf("%d", &escolha);
     
-    if (escolha == 1) 
+    switch (escolha)
     {
+    case 1:
         escrevermensagem(&Exibir_historicoMSG);
-    }
-    if (escolha == 2) 
-    {
+        exibir_historico(&Exibir_historicoMSG);
+        break;
+    case 2:
         prepararParaPC(&Exibir_historicoMSG);
-    } 
-    if (escolha == 3) 
-    {
-        exibir_historico(Exibir_historicoMSG);
+        exibir_historico(&Exibir_historicoMSG); 
+        break;
+    case 3:
+        printf("Chegou aqui.")
+        exibir_historico(&Exibir_historicoMSG);
+        break;
+    
+    default:
+    printf("Numero invalido.\n");
+        break;
     }
 
 }
@@ -158,14 +184,15 @@ void prepararParaPC(Lista *Exibir_historicoMSG) {
     char mensagem[32];
     receberDados(mensagem, 32);
     printf("Mensagem recebida: %s\n", mensagem);
-    enviarDados(mensagem);
+
     
     // Criar nó e adicionar à lista
     Mensage msg;
     strcpy(msg.msg, mensagem);
     msg.remet = Arduino;
     No* novo_no = cria_no(msg, Arduino);
-    add_na_lista(novo_no, Exibir_historicoMSG);
+    add_na_lista(novo_no,Exibir_historicoMSG);
+    enviarDados(mensagem);
     
     printf("\n");
 }
@@ -180,14 +207,15 @@ void escrevermensagem(Lista *Exibir_historicoMSG) {
         if (strlen(escolha) > 0) {
             printf("FOI ENVIADO\n");
             printf("MSG: %s\n", escolha);
-            enviarDados(escolha);
+
 
             // Criar nó e adicionar à lista
             Mensage m;
             strcpy(m.msg, escolha);
             m.remet = PC;
             No* novo_no = cria_no(m, PC);
-            add_na_lista(novo_no, Exibir_historicoMSG);
+            add_na_lista(novo_no,Exibir_historicoMSG);
+            enviarDados(escolha);
 
             escolhaConcluida = true;
         }
@@ -228,11 +256,11 @@ void imprime_msg(Mensage msg) {
     printf("Mensagem: %s\n", msg.msg);
 }
 
-void exibir_historico(Lista lista) {
-    No* marcador = lista.primeiro;
-    while (marcador != NULL) {
-        imprime_msg(marcador->msg);
-        marcador = marcador->next;
+void exibir_historico(Lista *lista) {
+    lista->marcador = lista->primeiro;
+    while (lista->marcador != NULL) {
+        imprime_msg(lista->marcador->msg);
+        lista->marcador = lista->marcador->next;
     }
 }
 
@@ -246,8 +274,6 @@ int main() {
         loop();  
     }
     
-
-
     fecharSerial();
     return 0;
 }
