@@ -8,13 +8,12 @@ LiquidCrystal lcd_1(2, 3, 4, 5, 6, 7);
 void setup() {
   Serial.begin(9600);
   lcd_1.begin(16, 2); // Inicialização do LCD com 16 colunas e 2 linhas
- 
+
   pinMode(BOTAO_NAVE, INPUT); // Define o pino do botão de navegação como entrada
   pinMode(BOTAO_CONF, INPUT); // Define o pino do botão de confirmação como entrada
 
   Menu(0);
 }
-
 
 void loop() {
   Menu(0);
@@ -22,6 +21,7 @@ void loop() {
 
 void Menu(int ind) {
   char vogais[] = {'a', 'e', 'i', 'o', 'u'};
+
   lcd_1.setCursor(3, 0); // Posiciona o cursor na primeira linha, quarta coluna
   lcd_1.print("BEM VINDO"); // Imprime "BEM VINDO" na primeira linha
   lcd_1.setCursor(2, 1); // Posiciona o cursor na segunda linha, terceira coluna
@@ -38,20 +38,21 @@ void Menu(int ind) {
 void prepararParaPC() {
   lcd_1.clear();
   lcd_1.print("Esperando...");
-  
-  // Aguarda mensagem pela porta serial
+  delay(500); // Adiciona uma pequena pausa para garantir que a mensagem seja exibida
+
   String mensagem = readSerialMessage();
   
-  // Exibe mensagem no LCD
   lcd_1.clear();
   lcd_1.print(mensagem);
-  Serial.println(mensagem);
   delay(7500);
   lcd_1.clear();
 }
 
 String readSerialMessage() {
   String message = "";
+  while (!Serial.available()) {
+    delay(100); // Aguarda até que haja dados disponíveis
+  }
   while (Serial.available()) {
     char c = Serial.read();
     if (c == '\n') {
@@ -64,8 +65,8 @@ String readSerialMessage() {
 
 void escolherVogais(int ind) {
   char vogais[] = {'a', 'e', 'i', 'o', 'u'};
-  int vogais_count = 0;
   char vogais_selecionadas[5];
+  int vogais_count = 0;
   bool escolhaConcluida = false;
 
   lcd_1.clear();
@@ -76,33 +77,26 @@ void escolherVogais(int ind) {
   delay(1000);
 
   while (!escolhaConcluida) {
-    // Verifica se o botão de navegação foi pressionado
     if (digitalRead(BOTAO_NAVE) == HIGH) {
-      // Incrementa o índice
       ind = (ind + 1) % 5;
-  
-      // Atualiza o display LCD com a nova letra
       lcd_1.setCursor(vogais_count, 1);
       lcd_1.print(vogais[ind]);
       delay(1000); // debounce
     }
-    	
-    // Verifica se o botão de confirmação foi pressionado
+      
     if (digitalRead(BOTAO_CONF) == HIGH) {
-      // Adiciona a letra selecionada ao vetor de letras selecionadas
       vogais_selecionadas[vogais_count] = vogais[ind];
       vogais_count++;
       lcd_1.setCursor(vogais_count, 1);
       lcd_1.print(vogais[ind]);
       
-      // Se já foram selecionadas 5 letras, exibe na segunda linha do display
       if (vogais_count == 5) {
         lcd_1.clear();
         lcd_1.setCursor(0, 0);
         lcd_1.print("FOI ENVIADO");
         lcd_1.setCursor(0, 1);
         lcd_1.print("MSG: ");
-	
+  
         Serial.println(" ");
         for (int i = 0; i < 5; i++) {
           lcd_1.print(vogais_selecionadas[i]);
@@ -113,18 +107,13 @@ void escolherVogais(int ind) {
         escolhaConcluida = true;
       }
       
-      // Aguarda até que o botão seja solto para evitar múltiplas inserções
       while (digitalRead(BOTAO_CONF) == HIGH) {
         delay(100);
       }
     }
   }
-  
-  // Limpa o vetor de vogais selecionadas
   for (int i = 0; i < 5; i++) {
     vogais_selecionadas[i] = '\0';
-  }
-  
-  // Reinicia o contador de vogais selecionadas
-  vogais_count = 0;
+  } 
+  vogais_count = 0;
 }
