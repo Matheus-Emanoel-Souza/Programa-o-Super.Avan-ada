@@ -71,7 +71,7 @@ void delay(unsigned int milliseconds) {
 
 void iniciarSerial() {
     hSerial = CreateFile(
-        "COM7",
+        "COM8",
         GENERIC_READ | GENERIC_WRITE,
         0,
         0,
@@ -132,22 +132,25 @@ void enviarDados(const char *data) {
 
 void receberDados(char *buffer, int length) {
     DWORD bytes_read;
+    
     if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
         printf("Erro ao ler a partir da porta serial\n");
     }
+    
+    
     buffer[bytes_read] = '\0';
 }
 
 void setup(Lista *Exibir_historicoMSG) {
-    printf("Inicialização\n");
+    printf("Bem vindo!!!\n");
     Menu(Exibir_historicoMSG);
 }
     
 void Menu(Lista *Exibir_historicoMSG) {
     limparEntradaSerial();
     limparSerialMonitor();
-    printf("-----BEM VINDO-----\n");
-    printf("1-ENVIAR 2-RECEBER 3-Historico\n");
+    printf("-----GRUPO BAO-----\n");
+    printf("1-ENVIAR 2-RECEBER 3-HISTORICO\n");
 
     int escolha;
     scanf("%d", &escolha);
@@ -156,14 +159,12 @@ void Menu(Lista *Exibir_historicoMSG) {
     {
     case 1:
         escrevermensagem(Exibir_historicoMSG);
-        exibir_historico(Exibir_historicoMSG);
         break;
     case 2:
         prepararParaPC(Exibir_historicoMSG);
-        exibir_historico(Exibir_historicoMSG); 
         break;
     case 3:
-        printf("Chegou aqui.");
+        printf("Historico de mensagens:\n");
         exibir_historico(Exibir_historicoMSG);
         break;
     
@@ -175,6 +176,7 @@ void Menu(Lista *Exibir_historicoMSG) {
 }
 
 void prepararParaPC(Lista *Exibir_historicoMSG) {
+
     char mensagem[32];
     receberDados(mensagem, 32);
     printf("Mensagem recebida: %s\n", mensagem);
@@ -196,19 +198,21 @@ void escrevermensagem(Lista *Exibir_historicoMSG) {
 
     while (!escolhaConcluida) {
         char escolha[36];
-        scanf("%s", escolha);
+        
+        // Lê uma linha de entrada, incluindo espaços
+        printf("Digite sua mensagem: ");
+        scanf(" %[^\n]", escolha);
 
         if (strlen(escolha) > 0) {
             printf("FOI ENVIADO\n");
             printf("MSG: %s\n", escolha);
-
 
             // Criar nó e adicionar à lista
             Mensage m;
             strcpy(m.msg, escolha);
             m.remet = PC;
             No* novo_no = cria_no(m, PC);
-            add_na_lista(novo_no,Exibir_historicoMSG);
+            add_na_lista(novo_no, Exibir_historicoMSG);
             enviarDados(escolha);
 
             escolhaConcluida = true;
