@@ -1,0 +1,4 @@
+Após a apresentação do projeto, a média deste trabalho foi de 7.
+Faltarama as seguintes coisas:
+Funções dentro de bibliotecas.
+especificação no relatório das funções presentes no trabalho e o que elas fazem.
